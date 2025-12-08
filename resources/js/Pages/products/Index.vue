@@ -49,34 +49,51 @@
       <button
         v-if="products.prev_page_url"
         @click="goToPage(products.current_page - 1)"
-        class="px-3 py-1 bg-gray-300 rounded"
+        class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
       >Previous</button>
+
+      <span class="px-3 py-1">Page {{ products.current_page }} of {{ products.last_page }}</span>
 
       <button
         v-if="products.next_page_url"
         @click="goToPage(products.current_page + 1)"
-        class="px-3 py-1 bg-gray-300 rounded"
+        class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
       >Next</button>
     </div>
 
     <!-- Product Details Modal -->
     <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div class="bg-white p-6 rounded w-1/2">
-        <h2 class="text-xl font-bold mb-4">Product Details</h2>
-        <p><strong>ID:</strong> {{ selectedProduct.id }}</p>
-        <p><strong>Name (EN):</strong> {{ selectedProduct.product_name_en }}</p>
-        <p><strong>Name (BN):</strong> {{ selectedProduct.product_name_bn }}</p>
-        <p><strong>Price:</strong> {{ selectedProduct.price }}</p>
-        <p><strong>Discount Price:</strong> {{ selectedProduct.discount_price }}</p>
-        <p><strong>Quantity:</strong> {{ selectedProduct.quantity }}</p>
-        <p><strong>Status:</strong> {{ selectedProduct.status }}</p>
-        <p><strong>Description (EN):</strong> {{ selectedProduct.description_en }}</p>
-        <p><strong>Description (BN):</strong> {{ selectedProduct.description_bn }}</p>
-        <div class="mt-4 text-right">
-          <button @click="closeModal" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">Close</button>
-        </div>
+  <div class="bg-white p-6 rounded w-1/2 overflow-y-auto max-h-[80vh]">
+    <h2 class="text-xl font-bold mb-4">Product Details</h2>
+    <p><strong>ID:</strong> {{ selectedProduct.id }}</p>
+    <p><strong>Name (EN):</strong> {{ selectedProduct.product_name_en }}</p>
+    <p><strong>Name (BN):</strong> {{ selectedProduct.product_name_bn }}</p>
+    <p><strong>Price:</strong> {{ selectedProduct.price }}</p>
+    <p><strong>Discount Price:</strong> {{ selectedProduct.discount_price }}</p>
+    <p><strong>Quantity:</strong> {{ selectedProduct.quantity }}</p>
+    <p><strong>Status:</strong> {{ selectedProduct.status }}</p>
+    <p><strong>Description (EN):</strong> {{ selectedProduct.description_en }}</p>
+    <p><strong>Description (BN):</strong> {{ selectedProduct.description_bn }}</p>
+
+    <!-- Product Images -->
+    <div v-if="selectedProduct.images && selectedProduct.images.length" class="mt-4">
+      <h3 class="font-bold mb-2">Images:</h3>
+      <div class="flex flex-wrap gap-2">
+        <img
+          v-for="(img, index) in parsedImages"
+          :key="index"
+          :src="img"
+          class="w-24 h-24 object-cover rounded border"
+        />
       </div>
     </div>
+
+
+    <div class="mt-4 text-right">
+      <button @click="closeModal" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">Close</button>
+    </div>
+  </div>
+</div>
   </div>
 </template>
 
