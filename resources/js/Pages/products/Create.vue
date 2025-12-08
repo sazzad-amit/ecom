@@ -1,6 +1,8 @@
 <template>
   <div class="p-4 max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold mb-6">Create Product</h1>
+    <h1 class="text-2xl font-bold mb-6">
+      {{ props.product ? 'Edit Product' : 'Create Product' }}
+    </h1>
 
     <form @submit.prevent="submit" class="space-y-6">
       <!-- Basic Information Section -->
@@ -24,7 +26,6 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
             <select v-model="form.category_id" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500">
               <option value="">Select Category</option>
-              <option value="1">1 Category</option>
               <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
             </select>
             <div v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">{{ form.errors.category_id }}</div>
@@ -35,7 +36,6 @@
       <!-- Pricing Section -->
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-lg font-semibold mb-4 pb-2 border-b">Pricing & Inventory</h2>
-        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Price *</label>
@@ -74,7 +74,6 @@
       <!-- Media Section -->
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-lg font-semibold mb-4 pb-2 border-b">Media</h2>
-        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Main Image</label>
@@ -108,7 +107,6 @@
       <!-- Description Section -->
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-lg font-semibold mb-4 pb-2 border-b">Descriptions</h2>
-        
         <div class="space-y-4">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Short Description (EN)</label>
@@ -136,7 +134,7 @@
 
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Calculation Details</label>
-            <textarea v-model="form.calculation" rows="3" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500" placeholder="Enter calculation details if any..."></textarea>
+            <textarea v-model="form.calculation" rows="3" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500"></textarea>
           </div>
         </div>
       </div>
@@ -144,7 +142,6 @@
       <!-- Seller Information Section -->
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-lg font-semibold mb-4 pb-2 border-b">Seller Information</h2>
-        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Seller Details</label>
@@ -165,7 +162,7 @@
         </button>
         <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150">
           <span v-if="form.processing">Saving...</span>
-          <span v-else>Save Product</span>
+          <span v-else>{{ props.product ? 'Update Product' : 'Save Product' }}</span>
         </button>
       </div>
     </form>
@@ -173,20 +170,13 @@
 </template>
 
 <script setup>
+import { ref, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
 
 const props = defineProps({
-  categories: {
-    type: Array,
-    default: () => []
-  }
+  categories: { type: Array, default: () => [] },
+  product: { type: Object, default: null } // edit এর জন্য
 });
-
-// Preview states
-const imagePreview = ref('');
-const imagesCount = ref(0);
-const videoPreview = ref('');
 
 const form = useForm({
   product_name_en: '',
@@ -209,54 +199,39 @@ const form = useForm({
   mobile_no: '',
 });
 
+// যদি props.product আসে, form fill করে দাও
+if (props.product) {
+  Object.assign(form, props.product);
+}
+
+// Previews
+const imagePreview = ref('');
+const imagesCount = ref(0);
+const videoPreview = ref('');
+
 // File upload handlers
-const handleImageUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    form.image = file;
-    imagePreview.value = file.name;
-  }
-};
+const handleImageUpload = e => { const file = e.target.files[0]; if(file){ form.image = file; imagePreview.value = file.name; } }
+const handleMultipleImages = e => { const files = Array.from(e.target.files); form.images = files; imagesCount.value = files.length; }
+const handleVideoUpload = e => { const file = e.target.files[0]; if(file){ form.video = file; videoPreview.value = file.name; } }
 
-const handleMultipleImages = (event) => {
-  const files = Array.from(event.target.files);
-  form.images = files;
-  imagesCount.value = files.length;
-};
-
-const handleVideoUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    form.video = file;
-    videoPreview.value = file.name;
-  }
-};
-
+// Submit
 const submit = () => {
-  // Convert boolean to integer for is_in_stock
-  const submissionData = {
-    ...form.data(),
-    is_in_stock: form.is_in_stock ? 1 : 0,
-    status: parseInt(form.status)
-  };
+  const method = props.product ? 'put' : 'post';
+  const routeName = props.product ? route('products.update', props.product.id) : route('products.store');
 
-  form.post(route('products.store'), {
+  // Convert boolean to integer
+  const submissionData = { ...form.data(), is_in_stock: form.is_in_stock ? 1 : 0, status: parseInt(form.status) };
+
+  form.submit(method, routeName, {
+    forceFormData: true,
     preserveScroll: true,
-    forceFormData: true, // Force Inertia to use FormData
-    onSuccess: () => {
-      console.log('Product created successfully');
-    },
-    onError: (errors) => {
-      console.log('Form errors:', errors);
-    },
+    onSuccess: () => console.log('Success'),
+    onError: e => console.log('Errors', e),
   });
-};
+}
 
-const cancel = () => {
-  router.visit(route('products.index'));
-};
+const cancel = () => { router.visit(route('products.index')); }
 </script>
 
 <style scoped>
-/* Additional custom styles if needed */
 </style>

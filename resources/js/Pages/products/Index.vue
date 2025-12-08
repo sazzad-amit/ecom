@@ -88,7 +88,6 @@
       </div>
     </div>
 
-
     <div class="mt-4 text-right">
       <button @click="closeModal" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600">Close</button>
     </div>
@@ -111,6 +110,15 @@ export default {
       selectedProduct: null,
     }
   },
+  computed: {
+    parsedImages() {
+      try {
+        return this.selectedProduct.images ? JSON.parse(this.selectedProduct.images) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+  },
   methods: {
     goToCreate() {
       router.get('/products/create');
@@ -122,7 +130,7 @@ export default {
       router.get('/products', { search: this.search, page }, { preserveState: true })
     },
     editProduct(id) {
-      router.get(`/products/${id}/edit`)
+      router.get(`/products/create?id=${id}`) // send id to create page for editing
     },
     deleteProduct(id) {
       if (confirm('Are you sure?')) {
