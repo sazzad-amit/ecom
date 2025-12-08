@@ -25,6 +25,7 @@
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
             <select v-model="form.category_id" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500">
+              <option value="1">1 Category</option>
               <option value="">Select Category</option>
               <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
             </select>
