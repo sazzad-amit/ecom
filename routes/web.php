@@ -25,6 +25,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Products resource routes
     Route::resource('products', ProductController::class);
+    Route::get('api/products/{id}', [ProductController::class, 'show'])->name('api.products.show');
+
 });
 
 require __DIR__.'/auth.php';

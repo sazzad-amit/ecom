@@ -285,4 +285,36 @@ class ProductController extends Controller
             Storage::disk('public')->delete($product->video);
         }
     }
+
+    // routes/api.php or routes/web.php
+
+// Or in your controller
+public function show($id)
+{
+    $product = Product::with(['category'])->findOrFail($id);
+    
+    // Format the response
+    return response()->json([
+        'id' => $product->id,
+        'product_name_en' => $product->product_name_en,
+        'product_name_bn' => $product->product_name_bn,
+        'category_id' => $product->category_id,
+        'price' => $product->price,
+        'discount_price' => $product->discount_price,
+        'quantity' => $product->quantity,
+        'is_in_stock' => $product->is_in_stock,
+        'status' => $product->status,
+        'description_en' => $product->description_en,
+        'description_bn' => $product->description_bn,
+        'short_description_en' => $product->short_description_en,
+        'short_description_bn' => $product->short_description_bn,
+        'calculation' => $product->calculation,
+        'seller_details' => $product->seller_details,
+        'mobile_no' => $product->mobile_no,
+        'image_url' => $product->image ? asset('storage/' . $product->image) : null,
+        'video_url' => $product->video ? asset('storage/' . $product->video) : null,
+        'images' => []
+    
+    ]);
+}
 }
