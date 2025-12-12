@@ -28,5 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('api/products/{id}', [ProductController::class, 'show'])->name('api.products.show');
 
 });
+    Route::get('api/products-landing-search', [ProductLandingController::class, 'search'])->name('api.products.search');
+
 
 require __DIR__.'/auth.php';
