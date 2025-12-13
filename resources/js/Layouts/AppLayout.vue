@@ -8,14 +8,14 @@
                     <div class="flex">
                         <!-- Logo / Brand -->
                         <div class="flex-shrink-0 flex items-center">
-                            <inertia-link href="/dashboard" class="text-xl font-bold text-gray-800">
+                            <Link href="/dashboard" class="text-xl font-bold text-gray-800">
                                 {{ appName }}
-                            </inertia-link>
+                            </Link>
                         </div>
                         
                         <!-- Desktop Navigation -->
                         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            <inertia-link 
+                            <Link 
                                 href="/dashboard" 
                                 class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200"
                                 :class="{
@@ -24,9 +24,9 @@
                                 }"
                             >
                                 Dashboard
-                            </inertia-link>
+                            </Link>
                             
-                            <inertia-link 
+                            <Link 
                                 href="/products" 
                                 class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200"
                                 :class="{
@@ -35,7 +35,7 @@
                                 }"
                             >
                                 Products
-                            </inertia-link>
+                            </Link>
                         </div>
                     </div>
                     
@@ -89,13 +89,13 @@
                                         v-click-outside="closeUserDropdown"
                                         class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50"
                                     >
-                                        <inertia-link 
+                                        <Link 
                                             href="/profile" 
                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             @click="closeUserDropdown"
                                         >
                                             Your Profile
-                                        </inertia-link>
+                                        </Link>
                                         <form @submit.prevent="logout">
                                             <button 
                                                 type="submit"
@@ -114,7 +114,7 @@
                 <!-- Mobile menu -->
                 <div v-if="mobileMenuOpen" class="sm:hidden border-t">
                     <div class="pt-2 pb-3 space-y-1">
-                        <inertia-link 
+                        <Link 
                             href="/dashboard" 
                             class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
                             :class="{
@@ -124,9 +124,9 @@
                             @click="mobileMenuOpen = false"
                         >
                             Dashboard
-                        </inertia-link>
+                        </Link>
                         
-                        <inertia-link 
+                        <Link 
                             href="/products" 
                             class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
                             :class="{
@@ -136,7 +136,7 @@
                             @click="mobileMenuOpen = false"
                         >
                             Products
-                        </inertia-link>
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -186,7 +186,7 @@
 
                     <!-- Navigation Menu -->
                     <nav class="space-y-2">
-                        <inertia-link 
+                        <Link 
                             href="/dashboard" 
                             class="flex items-center px-3 py-2 rounded-lg transition-colors"
                             :class="{
@@ -198,9 +198,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
                             <span class="ml-3">Dashboard</span>
-                        </inertia-link>
+                        </Link>
 
-                        <inertia-link 
+                        <Link 
                             href="/products" 
                             class="flex items-center px-3 py-2 rounded-lg transition-colors"
                             :class="{
@@ -212,19 +212,19 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                             </svg>
                             <span class="ml-3">Products</span>
-                        </inertia-link>
+                        </Link>
 
-                        <inertia-link 
-                            href="#" 
+                        <Link 
+                            href="/categories" 
                             class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                             </svg>
                             <span class="ml-3">Categories</span>
-                        </inertia-link>
+                        </Link>
 
-                        <inertia-link 
+                        <Link 
                             href="#" 
                             class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                         >
@@ -232,9 +232,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
                             <span class="ml-3">Orders</span>
-                        </inertia-link>
+                        </Link>
 
-                        <inertia-link 
+                        <Link 
                             href="#" 
                             class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                         >
@@ -242,9 +242,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                             <span class="ml-3">Customers</span>
-                        </inertia-link>
+                        </Link>
 
-                        <inertia-link 
+                        <Link 
                             href="/profile" 
                             class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                         >
@@ -253,7 +253,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             <span class="ml-3">Settings</span>
-                        </inertia-link>
+                        </Link>
                     </nav>
                 </div>
             </aside>
@@ -286,7 +286,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
 
 const sidebarOpen = ref(true);
 const userDropdownOpen = ref(false);

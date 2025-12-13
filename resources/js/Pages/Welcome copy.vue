@@ -86,7 +86,8 @@
             <div class="relative h-48 bg-gray-100 overflow-hidden">
               <img
                 :src="product.image"
-                :alt="product.product_name_en"
+                :alt="product.name"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
               <div class="absolute top-3 right-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs shadow-lg">
                 New
@@ -95,7 +96,7 @@
 
             <div class="p-4">
               <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">
-                {{ product.product_name_en }}
+                {{ product.name }}
               </h3>
 
               <div class="flex items-center justify-between">
@@ -129,12 +130,39 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
-import axios from "axios";
+import { ref, computed } from "vue";
 
 /* ------------------------------
-   Categories
+   Data
 --------------------------------*/
+const allProducts = ref([
+  { id: 1, name: "Wireless Headphones", price: 129, category: "Electronics", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400" },
+  { id: 2, name: "Premium Watch", price: 249, category: "Fashion", image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400" },
+  { id: 3, name: "Running Shoes", price: 89, category: "Sports", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400" },
+  { id: 4, name: "Smart Speaker", price: 179, category: "Electronics", image: "https://images.unsplash.com/photo-1589492477829-5e65395b66cc?w=400" },
+  { id: 5, name: "Leather Jacket", price: 299, category: "Fashion", image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400" },
+  { id: 6, name: "Coffee Maker", price: 149, category: "Home", image: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400" },
+  { id: 7, name: "Yoga Mat", price: 39, category: "Sports", image: "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400" },
+  { id: 8, name: "Desk Lamp", price: 59, category: "Home", image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400" },
+  { id: 9, name: "Bluetooth Speaker", price: 99, category: "Electronics", image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400" },
+  { id: 10, name: "Sunglasses", price: 119, category: "Fashion", image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400" },
+  { id: 11, name: "Gaming Mouse", price: 79, category: "Electronics", image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400" },
+  { id: 12, name: "Backpack", price: 69, category: "Fashion", image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400" },
+  { id: 13, name: "Water Bottle", price: 25, category: "Sports", image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400" },
+  { id: 14, name: "Wall Clock", price: 45, category: "Home", image: "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=400" },
+  { id: 15, name: "Keyboard", price: 129, category: "Electronics", image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400" },
+  { id: 16, name: "Sneakers", price: 95, category: "Sports", image: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=400" },
+  { id: 17, name: "Throw Pillow", price: 35, category: "Home", image: "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=400" },
+  { id: 18, name: "T-Shirt", price: 29, category: "Fashion", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400" },
+  { id: 19, name: "Dumbbell Set", price: 159, category: "Sports", image: "https://images.unsplash.com/photo-1638805982835-e6c8b1a3ecf1?w=400" },
+  { id: 20, name: "Table Lamp", price: 79, category: "Home", image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400" },
+  { id: 21, name: "Wireless Earbuds", price: 159, category: "Electronics", image: "https://images.unsplash.com/photo-1590658165737-15a047b7a9d8?w=400" },
+  { id: 22, name: "Baseball Cap", price: 25, category: "Fashion", image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400" },
+  { id: 23, name: "Yoga Block", price: 19, category: "Sports", image: "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400" },
+  { id: 24, name: "Plant Pot", price: 29, category: "Home", image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400" },
+  { id: 25, name: "Webcam", price: 89, category: "Electronics", image: "https://images.unsplash.com/photo-1587826080692-f439cd0b70da?w=400" }
+]);
+
 const categories = [
   { name: "All Products", icon: "🛍️" },
   { name: "Electronics", icon: "📱" },
@@ -146,47 +174,21 @@ const categories = [
 /* ------------------------------
    State
 --------------------------------*/
-const products = ref([]);
 const searchQuery = ref("");
 const selectedCategory = ref("All Products");
 const mobileFilterOpen = ref(false);
-const loading = ref(false);
-
-/* ------------------------------
-   API Call
---------------------------------*/
-const fetchProducts = async () => {
-  loading.value = true;
-
-  try {
-    const response = await axios.get("/api/products-landing-search", {
-      params: {
-        q: searchQuery.value || null,
-        category:
-          selectedCategory.value === "All Products"
-            ? null
-            : selectedCategory.value,
-      },
-    });
-
-    products.value = response.data.data.data;
-  } catch (error) {
-    console.error("Product fetch failed", error);
-  } finally {
-    loading.value = false;
-  }
-};
 
 /* ------------------------------
    Computed
 --------------------------------*/
-const filteredProducts = computed(() => products.value);
+const filteredProducts = computed(() => {
+  return allProducts.value.filter((p) => {
+    const matchSearch = p.name.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchCategory =
+      selectedCategory.value === "All Products" || p.category === selectedCategory.value;
 
-/* ------------------------------
-   Watch (Live Search + Filter)
---------------------------------*/
-watch([searchQuery, selectedCategory], () => {
-  fetchProducts();
+    return matchSearch && matchCategory;
+  });
 });
 
 /* ------------------------------
@@ -196,11 +198,4 @@ function selectCategory(cat) {
   selectedCategory.value = cat;
   mobileFilterOpen.value = false;
 }
-
-/* ------------------------------
-   On Load
---------------------------------*/
-onMounted(() => {
-  fetchProducts();
-});
 </script>
