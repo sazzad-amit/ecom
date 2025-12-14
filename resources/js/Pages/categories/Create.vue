@@ -1,341 +1,247 @@
 <template>
-  <div class="p-4 max-w-4xl mx-auto">
-    <div v-if="loading" class="text-center py-8">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-      <p class="mt-2 text-gray-600">Loading...</p>
-    </div>
+  <AppLayout>
+    <div class="p-6 max-w-4xl mx-auto">
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+        <p class="mt-3 text-gray-600">Loading category data...</p>
+      </div>
 
-    <div v-else>
-      <h1 class="text-2xl font-bold mb-6">
-        {{ product ? 'Edit Product' : 'Create Product' }}
-      </h1>
-
-      <form @submit.prevent="submit" class="space-y-6">
-        <!-- Basic Information Section -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h2 class="text-lg font-semibold mb-4 pb-2 border-b">Basic Information</h2>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Product Name (EN) *</label>
-              <input v-model="form.product_name_en" type="text" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500" />
-              <div v-if="form.errors.product_name_en" class="text-red-500 text-sm mt-1">{{ form.errors.product_name_en }}</div>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Product Name (BN)</label>
-              <input v-model="form.product_name_bn" type="text" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500" />
-              <div v-if="form.errors.product_name_bn" class="text-red-500 text-sm mt-1">{{ form.errors.product_name_bn }}</div>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-              <select v-model="form.category_id" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500">
-                <option value="0">Select Category</option>
-                <option value="1"> Category 1</option>
-                <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
-              </select>
-              <div v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">{{ form.errors.category_id }}</div>
-            </div>
-          </div>
+      <!-- Content -->
+      <div v-else>
+        <!-- Header -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-gray-900">
+            {{ category ? 'Edit Category' : 'Create New Category' }}
+          </h1>
+          <p class="mt-2 text-gray-600">
+            {{ category ? 'Update category details below' : 'Fill in the details to create a new category' }}
+          </p>
         </div>
 
-        <!-- Pricing Section -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h2 class="text-lg font-semibold mb-4 pb-2 border-b">Pricing & Inventory</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Price *</label>
-              <input v-model="form.price" type="number" step="0.01" min="0" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500" />
-              <div v-if="form.errors.price" class="text-red-500 text-sm mt-1">{{ form.errors.price }}</div>
-            </div>
+        <!-- Form -->
+        <form @submit.prevent="submit" class="bg-white shadow-xl rounded-2xl p-6 md:p-8">
+          <!-- Basic Information -->
+          <div class="mb-10">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 pb-4 border-b border-gray-200 flex items-center">
+              <svg class="w-6 h-6 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Basic Information
+            </h2>
 
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Discount Price</label>
-              <input v-model="form.discount_price" type="number" step="0.01" min="0" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-              <input v-model="form.quantity" type="number" min="0" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500" />
-              <div v-if="form.errors.quantity" class="text-red-500 text-sm mt-1">{{ form.errors.quantity }}</div>
-            </div>
-
-            <div class="mb-4">
-              <label class="flex items-center space-x-2">
-                <input v-model="form.is_in_stock" type="checkbox" class="rounded text-blue-500" />
-                <span class="text-sm font-medium text-gray-700">In Stock</span>
-              </label>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select v-model="form.status" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500">
-                <option :value="1">Active</option>
-                <option :value="0">Inactive</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Media Section -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h2 class="text-lg font-semibold mb-4 pb-2 border-b">Media</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Main Image</label>
-              <input type="file" @change="handleImageUpload" accept="image/*" class="border border-gray-300 rounded p-2 w-full" />
-              
-              <!-- Show existing image if in edit mode -->
-              <div v-if="product && product.image_url" class="mt-2">
-                <p class="text-sm text-gray-600 mb-2">Current Image:</p>
-                <img :src="product.image_url" alt="Current product image" class="h-20 w-20 object-cover rounded border" />
-              </div>
-              
-              <div v-if="imagePreview" class="mt-2">
-                <span class="text-sm text-gray-600">New image selected: {{ imagePreview }}</span>
-              </div>
-              <div v-if="form.errors.image" class="text-red-500 text-sm mt-1">{{ form.errors.image }}</div>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Multiple Images</label>
-              <input type="file" multiple @change="handleMultipleImages" accept="image/*" class="border border-gray-300 rounded p-2 w-full" />
-              
-              <!-- Show existing images if in edit mode -->
-              <div v-if="product && product.images && product.images.length > 0" class="mt-2">
-                <p class="text-sm text-gray-600 mb-2">Current Images ({{ product.images.length }}):</p>
-                <div class="flex space-x-2">
-                  <img v-for="(img, index) in product.images" :key="index" :src="img.url" alt="Gallery image" class="h-16 w-16 object-cover rounded border" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Category Name (EN) -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Category Name (English) *
+                  <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.category_name_en"
+                  type="text"
+                  required
+                  :class="[
+                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors',
+                    form.errors.category_name_en ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  ]"
+                  placeholder="e.g., Electronics"
+                />
+                <div v-if="form.errors.category_name_en" class="mt-2 text-sm text-red-600 flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  {{ form.errors.category_name_en }}
                 </div>
               </div>
-              
-              <div v-if="imagesCount > 0" class="mt-2">
-                <span class="text-sm text-gray-600">{{ imagesCount }} new images selected</span>
-              </div>
-              <div v-if="form.errors.images" class="text-red-500 text-sm mt-1">{{ form.errors.images }}</div>
-            </div>
 
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Video</label>
-              <input type="file" @change="handleVideoUpload" accept="video/*" class="border border-gray-300 rounded p-2 w-full" />
-              
-              <!-- Show existing video if in edit mode -->
-              <div v-if="product && product.video_url" class="mt-2">
-                <p class="text-sm text-gray-600 mb-2">Current Video:</p>
-                <video :src="product.video_url" class="h-20 w-20 object-cover rounded border" controls></video>
+              <!-- Category Name (BN) -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Category Name (বাংলা)
+                </label>
+                <input
+                  v-model="form.category_name_bn"
+                  type="text"
+                  :class="[
+                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors',
+                    form.errors.category_name_bn ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  ]"
+                  placeholder="যেমন: ইলেকট্রনিক্স"
+                />
+                <div v-if="form.errors.category_name_bn" class="mt-2 text-sm text-red-600 flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  {{ form.errors.category_name_bn }}
+                </div>
               </div>
-              
-              <div v-if="videoPreview" class="mt-2">
-                <span class="text-sm text-gray-600">New video selected: {{ videoPreview }}</span>
+
+              <!-- Parent Category -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Parent Category
+                </label>
+                <select
+                  v-model="form.parent_id"
+                  :class="[
+                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none',
+                    form.errors.parent_id ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  ]"
+                >
+                  <option value="">Select a parent category (optional)</option>
+                  <option
+                    v-for="parentCat in parentCategories"
+                    :key="parentCat.id"
+                    :value="parentCat.id"
+                    :disabled="category && category.id === parentCat.id"
+                  >
+                    {{ parentCat.category_name_en }}
+                    {{ parentCat.category_name_bn ? `(${parentCat.category_name_bn})` : '' }}
+                  </option>
+                </select>
+                <div v-if="form.errors.parent_id" class="mt-2 text-sm text-red-600 flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  {{ form.errors.parent_id }}
+                </div>
+                <p class="mt-2 text-sm text-gray-500">
+                  Leave empty if this is a main category
+                </p>
               </div>
-              <div v-if="form.errors.video" class="text-red-500 text-sm mt-1">{{ form.errors.video }}</div>
+
+              <!-- Status -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <div class="flex items-center space-x-4">
+                  <label class="flex items-center">
+                    <input
+                      type="radio"
+                      v-model="form.status"
+                      :value="1"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span class="ml-2 text-gray-700">Active</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      type="radio"
+                      v-model="form.status"
+                      :value="0"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span class="ml-2 text-gray-700">Inactive</span>
+                  </label>
+                </div>
+                <p class="mt-2 text-sm text-gray-500">
+                  Inactive categories won't be visible in the frontend
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Description Section -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h2 class="text-lg font-semibold mb-4 pb-2 border-b">Descriptions</h2>
-          <div class="space-y-4">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Short Description (EN)</label>
-              <textarea v-model="form.short_description_en" rows="2" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500"></textarea>
-              <div v-if="form.errors.short_description_en" class="text-red-500 text-sm mt-1">{{ form.errors.short_description_en }}</div>
+          <!-- Form Actions -->
+          <div class="pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-gray-500">
+              <span class="text-red-500">*</span> Required fields
             </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Short Description (BN)</label>
-              <textarea v-model="form.short_description_bn" rows="2" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500"></textarea>
-              <div v-if="form.errors.short_description_bn" class="text-red-500 text-sm mt-1">{{ form.errors.short_description_bn }}</div>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Full Description (EN)</label>
-              <textarea v-model="form.description_en" rows="4" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500"></textarea>
-              <div v-if="form.errors.description_en" class="text-red-500 text-sm mt-1">{{ form.errors.description_en }}</div>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Full Description (BN)</label>
-              <textarea v-model="form.description_bn" rows="4" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500"></textarea>
-              <div v-if="form.errors.description_bn" class="text-red-500 text-sm mt-1">{{ form.errors.description_bn }}</div>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Calculation Details</label>
-              <textarea v-model="form.calculation" rows="3" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Seller Information Section -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h2 class="text-lg font-semibold mb-4 pb-2 border-b">Seller Information</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Seller Details</label>
-              <textarea v-model="form.seller_details" rows="3" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500"></textarea>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
-              <input v-model="form.mobile_no" type="tel" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500" />
+            <div class="flex space-x-3">
+              <Link
+                :href="route('categories.index')"
+                class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+              >
+                Cancel
+              </Link>
+              <button
+                type="submit"
+                :disabled="form.processing"
+                :class="[
+                  'px-6 py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
+                  form.processing
+                    ? 'bg-blue-400 cursor-not-allowed text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500'
+                ]"
+              >
+                <span v-if="form.processing" class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {{ category ? 'Updating...' : 'Creating...' }}
+                </span>
+                <span v-else>
+                  {{ category ? 'Update Category' : 'Create Category' }}
+                </span>
+              </button>
             </div>
           </div>
-        </div>
-
-        <!-- Form Actions -->
-        <div class="flex justify-end space-x-3 pt-4 border-t">
-          <button type="button" @click="cancel" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition duration-150">
-            Cancel
-          </button>
-          <button type="submit" :disabled="form.processing || loading" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150">
-            <span v-if="form.processing">Saving...</span>
-            <span v-else>{{ product ? 'Update Product' : 'Save Product' }}</span>
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
-import axios from 'axios';
+import { useForm, Link } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue';
 
 const props = defineProps({
-  categories: { type: Array, default: () => [] },
-});
-
-const loading = ref(false);
-const product = ref(null);
-const productId = ref(null);
-
-// Check if we're in edit mode by looking for ID in URL
-const isEditMode = computed(() => productId.value !== null);
-
-// Initialize form
-const form = useForm({
-  product_name_en: '',
-  product_name_bn: '',
-  category_id: 0,
-  price: '',
-  discount_price: '',
-  quantity: 0,
-  is_in_stock: true,
-  status: 1,
-  image: null,
-  images: [],
-  video: null,
-  description_en: '',
-  description_bn: '',
-  short_description_en: '',
-  short_description_bn: '',
-  calculation: '',
-  seller_details: '',
-  mobile_no: '',
-});
-
-// Previews
-const imagePreview = ref('');
-const imagesCount = ref(0);
-const videoPreview = ref('');
-
-// Check URL for product ID on component mount
-onMounted(async () => {
-  const url = new URL(window.location.href);
-  const id = url.searchParams.get('id');
-  
-  if (id) {
-    productId.value = id;
-    await fetchProduct(id);
+  category: {
+    type: Object,
+    default: null
+  },
+  categories: {
+    type: Array,
+    default: () => []
   }
 });
 
-// Fetch product data from API
-const fetchProduct = async (id) => {
-  try {
-    loading.value = true;
-    const response = await axios.get(route('api.products.show', id));
-    product.value = response.data;
-    
-    // Populate form with existing data
-    Object.keys(form).forEach(key => {
-      if (key in product.value) {
-        form[key] = product.value[key];
-      }
-    });
-    
-    // Convert status to number if it's coming as string
-    form.status = parseInt(product.value.status);
-    form.category_id = parseInt(product.value.category_id);
-    form.is_in_stock = Boolean(product.value.is_in_stock);
-    
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    // Optionally show an error message to user
-  } finally {
+const loading = ref(props.category === null ? false : true);
+const form = useForm({
+  category_name_en: props.category?.category_name_en || '',
+  category_name_bn: props.category?.category_name_bn || '',
+  parent_id: props.category?.parent_id || '',
+  status: props.category?.status ?? 1,
+});
+
+const parentCategories = computed(() => {
+  if (!props.category) return props.categories;
+  return props.categories.filter(cat => cat.id !== props.category.id);
+});
+
+onMounted(() => {
+  if (props.category) {
     loading.value = false;
   }
-};
+});
 
-// File upload handlers
-const handleImageUpload = (e) => { 
-  const file = e.target.files[0]; 
-  if(file){ 
-    form.image = file; 
-    imagePreview.value = file.name; 
-  } 
-}
-
-const handleMultipleImages = (e) => { 
-  const files = Array.from(e.target.files); 
-  form.images = files; 
-  imagesCount.value = files.length; 
-}
-
-const handleVideoUpload = (e) => { 
-  const file = e.target.files[0]; 
-  if(file){ 
-    form.video = file; 
-    videoPreview.value = file.name; 
-  } 
-}
-
-// Submit form
 const submit = () => {
-  const method = isEditMode.value ? 'put' : 'post';
-  const routeName = isEditMode.value ? route('products.update', productId.value) : route('products.store');
-
-  // Convert boolean to integer
-  const submissionData = { 
-    ...form.data(), 
-    is_in_stock: form.is_in_stock ? 1 : 0, 
-    status: parseInt(form.status),
-    _method: method === 'put' ? 'PUT' : 'POST' // For Laravel method spoofing
-  };
-
-  form.submit(method, routeName, {
-    forceFormData: true,
-    preserveScroll: true,
-    data: submissionData,
-    onSuccess: () => {
-      console.log('Success');
-      router.visit(route('products.index'));
-    },
-    onError: (e) => {
-      console.log('Errors', e);
-    },
-  });
-}
-
-const cancel = () => { 
-  router.visit(route('products.index')); 
-}
+  if (props.category) {
+    // Update existing category
+    form.put(route('categories.update', props.category.id), {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Success handled by Inertia
+      },
+      onError: (errors) => {
+        console.error('Update failed:', errors);
+      }
+    });
+  } else {
+    // Create new category
+    form.post(route('categories.store'), {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Success handled by Inertia
+      },
+      onError: (errors) => {
+        console.error('Creation failed:', errors);
+      }
+    });
+  }
+};
 </script>
-
-<style scoped>
-/* Optional: Add custom styles if needed */
-</style>

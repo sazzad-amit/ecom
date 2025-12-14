@@ -137,6 +137,42 @@
                         >
                             Products
                         </Link>
+
+                        <Link 
+                            href="/categories" 
+                            class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+                            :class="{
+                                'border-indigo-500 bg-indigo-50 text-indigo-700': $page.url.startsWith('/categories'),
+                                'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800': !$page.url.startsWith('/categories')
+                            }"
+                            @click="mobileMenuOpen = false"
+                        >
+                            Categories
+                        </Link>
+                        
+                        <Link 
+                            href="/sources" 
+                            class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+                            :class="{
+                                'border-indigo-500 bg-indigo-50 text-indigo-700': $page.url.startsWith('/sources'),
+                                'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800': !$page.url.startsWith('/sources')
+                            }"
+                            @click="mobileMenuOpen = false"
+                        >
+                            Sources
+                        </Link>
+                        
+                        <Link 
+                            href="/receivers" 
+                            class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+                            :class="{
+                                'border-indigo-500 bg-indigo-50 text-indigo-700': $page.url.startsWith('/receivers'),
+                                'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800': !$page.url.startsWith('/receivers')
+                            }"
+                            @click="mobileMenuOpen = false"
+                        >
+                            Receivers
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -213,15 +249,47 @@
                             </svg>
                             <span class="ml-3">Products</span>
                         </Link>
-
+                        
                         <Link 
                             href="/categories" 
                             class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                            :class="{
+                                'bg-gray-900': $page.url.startsWith('/categories'),
+                                'hover:bg-gray-700': !$page.url.startsWith('/categories')
+                            }"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                             </svg>
                             <span class="ml-3">Categories</span>
+                        </Link>
+                        
+                        <Link 
+                            href="/sources" 
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors"
+                            :class="{
+                                'bg-gray-900': $page.url.startsWith('/sources'),
+                                'hover:bg-gray-700': !$page.url.startsWith('/sources')
+                            }"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                            <span class="ml-3">Sources</span>
+                        </Link>
+
+                        <Link 
+                            href="/receivers" 
+                            class="flex items-center px-3 py-2 rounded-lg transition-colors"
+                            :class="{
+                                'bg-gray-900': $page.url.startsWith('/receivers'),
+                                'hover:bg-gray-700': !$page.url.startsWith('/receivers')
+                            }"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                            <span class="ml-3">Receivers</span>
                         </Link>
 
                         <Link 
