@@ -70,7 +70,7 @@ class CategoryController extends Controller
     {
         return Inertia::render('Categories/Edit', [
             'category' => $category,
-            'categories' => Category::where('id', '!=', $category->id)->get(), // prevent self parent
+            'categories' => Category::where('id', '!=', $category->id)->get(),
         ]);
     }
 
@@ -80,13 +80,14 @@ class CategoryController extends Controller
             'category_name_en' => 'required|string|max:255',
             'category_name_bn' => 'nullable|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
-            'status' => 'nullable|boolean',
+            'status' => 'required|boolean',
         ]);
 
         try {
             DB::beginTransaction();
 
-            $validated['status'] = $request->input('status', 1) ? 1 : 0;
+            // Ensure parent_id is null if empty
+            $validated['parent_id'] = $request->filled('parent_id') ? $request->parent_id : null;
             $validated['updated_by'] = auth()->id();
 
             $category->update($validated);
@@ -103,6 +104,7 @@ class CategoryController extends Controller
                 ->withErrors(['error' => 'Failed to update category: ' . $e->getMessage()]);
         }
     }
+
 
     public function destroy(Category $category)
     {
