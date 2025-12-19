@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Category;
 
 class ProductLandingController extends Controller
 {
@@ -111,6 +112,17 @@ class ProductLandingController extends Controller
                 'created_at' => $product->created_at->format('Y-m-d H:i:s'),
                 'updated_at' => $product->updated_at->format('Y-m-d H:i:s'),
             ]
+        ]);
+    }
+
+    public function categories()
+    {
+        $data = Category::select('id', 'category_name_en', 'category_name_bn', 'parent_id' )->get();
+         return response()->json([
+            'success' => true,
+            'data' => [
+                'data' => $data,
+            ],
         ]);
     }
 }

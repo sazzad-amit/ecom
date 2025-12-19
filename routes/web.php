@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
 
 });
     Route::get('api/products-landing-search', [ProductLandingController::class, 'search'])->name('api.products.search');
+    Route::get('api/products-categories-search', [ProductLandingController::class, 'categories'])->name('api.products.categories');
 
 
 require __DIR__.'/auth.php';

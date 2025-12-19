@@ -30,25 +30,92 @@
             placeholder="Search product..."
             class="w-full px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+          <div class="space-y-2" v-for="cat in categories" :key="cat.id">
+  <span>
+    <!-- Breadcrumb chain -->
+    <template v-for="(name, index) in (() => {
+      const map = {};
+      categories.forEach(c => map[c.id] = c);
+      const path = [];
+      let current = cat;
+      while (current) {
+        path.push(current.category_name_en);
+        current = current.parent_id ? map[current.parent_id] : null;
+      }
+      return path.reverse();
+    })()" :key="index">
+      <span
+        class="text-blue-600 cursor-pointer hover:underline"
+        @click="birthChild(name)"
+      >
+        {{ name }}
+      </span>
+      <span v-if="index < (() => {
+        const map = {};
+        categories.forEach(c => map[c.id] = c);
+        const path = [];
+        let current = cat;
+        while (current) {
+          path.push(current.category_name_en);
+          current = current.parent_id ? map[current.parent_id] : null;
+        }
+        return path.reverse();
+      })().length - 1"> -> </span>
+    </template>
+  </span>
+</div>
+
 
           <div class="space-y-2">
-            <button
-              v-for="cat in categories"
-              :key="cat"
-              @click="selectedCategory = cat"
-              class="w-full px-3 py-2 rounded-lg text-left transition-colors"
-              :class="selectedCategory === cat
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 hover:bg-gray-200'"
-            >
-              {{ cat }}
-            </button>
+            <!-- Show category data instead of just count -->
+            <div v-for="category in categories" :key="category.id || category.category_id" 
+                 class="p-2 hover:bg-gray-50 rounded cursor-pointer"
+                 @click="selectCategory(category.category_name_en)">
+              <div class="flex items-center justify-between">
+                <span class="font-medium">{{ category.category_name_en }}</span>
+                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                  {{ getCategoryCount(category.category_name_en) }}
+                </span>
+              </div>
+              <div v-if="category.description" class="text-xs text-gray-500 mt-1">
+                {{ category.description }}
+              </div>
+            </div>
           </div>
         </div>
       </aside>
 
       <!-- ================= Products ================= -->
       <main class="flex-1">
+        <!-- Mobile Category Filter -->
+        <div class="lg:hidden mb-6">
+          <div class="flex items-center gap-2 overflow-x-auto pb-2">
+            <button
+              @click="selectCategory('All Products')"
+              class="flex-shrink-0 px-4 py-2 rounded-full text-sm transition-colors"
+              :class="selectedCategory === 'All Products'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+            >
+              All Products
+            </button>
+            <button
+              v-for="category in categories"
+              :key="category.id || category.category_id"
+              @click="selectCategory(category.category_name_en)"
+              class="flex-shrink-0 px-4 py-2 rounded-full text-sm transition-colors"
+              :class="selectedCategory === category.category_name_en
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+            >
+              {{ category.category_name_en }}
+              <span class="ml-1 text-xs bg-white/30 px-1.5 py-0.5 rounded-full">
+                {{ getCategoryCount(category.category_name_en) }}
+              </span>
+            </button>
+          </div>
+        </div>
+
         <h2 class="text-2xl font-bold mb-2">{{ selectedCategory }}</h2>
         <p class="text-gray-500 mb-6">{{ filteredProducts.length }} products found</p>
 
@@ -159,19 +226,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 
 /* ================= State ================= */
 const products = ref([]);
+const categories = ref([]);
 const searchQuery = ref("");
 const selectedCategory = ref("All Products");
 const detailsOpen = ref(false);
 const selectedProduct = ref({});
 const cartOpen = ref(false);
-
-const categories = [
-  "All Products",
-  "Electronics",
-  "Fashion",
-  "Home",
-  "Sports",
-];
 
 /* ================= Stores ================= */
 const cartStore = useCartStore();
@@ -200,6 +260,7 @@ const filteredProducts = computed(() => {
 });
 
 /* ================= Methods ================= */
+
 const fetchProducts = async () => {
   try {
     const res = await axios.get(`${API_BASE_URL}/api/products-landing-search`, {
@@ -210,10 +271,20 @@ const fetchProducts = async () => {
           : selectedCategory.value,
       },
     });
-    products.value = res.data.data?.data || [];
+    products.value = res.data?.data?.data || res.data?.data || res.data || [];
   } catch (error) {
     console.error('Error fetching products:', error);
     products.value = [];
+  }
+};
+
+const fetchCategories = async () => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/api/products-categories-search`);
+    categories.value = res.data?.data?.data || res.data?.data || res.data || [];
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    categories.value = [];
   }
 };
 
@@ -247,8 +318,19 @@ const openCart = () => {
 
 const handleCheckout = () => {
   cartOpen.value = false;
-  // You can add any post-checkout logic here
   console.log('Checkout completed');
+};
+
+const selectCategory = (categoryName) => {
+  selectedCategory.value = categoryName;
+};
+
+const getCategoryCount = (categoryName) => {
+  if (categoryName === "All Products") return products.value.length;
+  
+  return products.value.filter(product => 
+    product.category?.category_name_en === categoryName
+  ).length;
 };
 
 /* ================= Watch ================= */
@@ -257,6 +339,7 @@ watch([searchQuery, selectedCategory], fetchProducts);
 /* ================= Lifecycle ================= */
 onMounted(() => {
   fetchProducts();
+  fetchCategories();
 });
 </script>
 
@@ -266,5 +349,15 @@ onMounted(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Mobile category filter scrollbar hide */
+.overflow-x-auto {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
 }
 </style>
