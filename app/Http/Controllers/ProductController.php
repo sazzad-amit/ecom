@@ -12,27 +12,6 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
-
-    // public function index(Request $request)
-    // {
-    //     $query = Product::with('category')
-    //         ->latest();
-    //     if ($request->filled('search')) {
-    //         $search = $request->input('search');
-    //         $query->where(function($q) use ($search) {
-    //             $q->where('product_name_en', 'LIKE', "%{$search}%")
-    //               ->orWhere('product_name_bn', 'LIKE', "%{$search}%")
-    //               ->orWhere('auto_id', 'LIKE', "%{$search}%");
-    //         });
-    //     }
-        
-    //     $products = $query->paginate(10);
-        
-    //     return Inertia::render('Products/Index', [
-    //         'products' => $products,
-    //         'filters' => $request->only(['search'])
-    //     ]);
-    // }
     public function index()
     {
         $products = Product::with('category')
@@ -52,196 +31,98 @@ class ProductController extends Controller
         ]);
     }
 
-    // public function store(Request $request)
-    // {
-    //     // Add better debugging
-    //     \Log::info('Product store request', [
-    //         'all_data' => $request->all(),
-    //         'files' => $request->allFiles(),
-    //         'has_image' => $request->hasFile('image'),
-    //         'has_images' => $request->hasFile('images'),
-    //     ]);
-
-    //     $validated = $request->validate([
-    //         'product_name_en' => 'required|string|max:255',
-    //         'product_name_bn' => 'nullable|string|max:255',
-    //         'category_id' => 'nullable|exists:categories,id', // Made nullable since it's commented
-    //         'price' => 'required|numeric|min:0',
-    //         'discount_price' => 'nullable|numeric|min:0',
-    //         'quantity' => 'nullable|integer|min:0',
-    //         'is_in_stock' => 'nullable',
-    //         'status' => 'nullable',
-    //         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-    //         'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-    //         'video' => 'nullable|mimes:mp4,mov,avi,wmv|max:10240',
-    //         'description_en' => 'nullable|string',
-    //         'description_bn' => 'nullable|string',
-    //         'short_description_en' => 'nullable|string',
-    //         'short_description_bn' => 'nullable|string',
-    //         'calculation' => 'nullable|string',
-    //         'seller_details' => 'nullable|string',
-    //         'mobile_no' => 'nullable|string|max:20',
-    //     ]);
-
-    //     try {
-    //         DB::beginTransaction();
-
-    //         // Set created_by from authenticated user
-    //         $validated['created_by'] = auth()->id();
-    //         $validated['is_in_stock'] = $request->input('is_in_stock', 0) ? 1 : 0;
-    //         $validated['status'] = $request->input('status', 1) ? 1 : 0;
-
-    //         // Handle file uploads
-    //         if ($request->hasFile('image')) {
-    //             $validated['image'] = $this->storeFile($request->file('image'), 'products/images');
-    //         }
-
-    //         // Handle multiple images
-    //         if ($request->hasFile('images')) {
-    //             $images = [];
-    //             foreach ($request->file('images') as $image) {
-    //                 $images[] = $this->storeFile($image, 'products/images');
-    //             }
-    //             $validated['images'] = json_encode($images);
-    //         }
-
-    //         // Handle video upload
-    //         if ($request->hasFile('video')) {
-    //             $validated['video'] = $this->storeFile($request->file('video'), 'products/videos');
-    //         }
-
-    //         // Create product
-    //         $product = Product::create($validated);
-            
-    //         // Generate auto_id after product creation
-    //         $product->update([
-    //             'auto_id' => date('dmy') . str_pad($product->id, 9, '0', STR_PAD_LEFT)
-    //         ]);
-
-    //         DB::commit();
-
-    //         return redirect()->route('products.index')
-    //             ->with('success', 'Product created successfully');
-                
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-            
-    //         \Log::error('Product creation failed', [
-    //             'error' => $e->getMessage(),
-    //             'trace' => $e->getTraceAsString()
-    //         ]);
-            
-    //         // Clean up uploaded files if transaction fails
-    //         if (isset($validated['image'])) {
-    //             Storage::disk('public')->delete($validated['image']);
-    //         }
-    //         if (isset($validated['images'])) {
-    //             $images = json_decode($validated['images'], true);
-    //             foreach ($images as $img) {
-    //                 Storage::disk('public')->delete($img);
-    //             }
-    //         }
-    //         if (isset($validated['video'])) {
-    //             Storage::disk('public')->delete($validated['video']);
-    //         }
-            
-    //         return back()
-    //             ->withInput()
-    //             ->withErrors(['error' => 'Failed to create product: ' . $e->getMessage()]);
-    //     }
-    // }
     public function store(Request $request)
-{
-    \Log::info('Product store request', [
-        'all_data' => $request->all(),
-        'files' => $request->allFiles(),
-        'has_image' => $request->hasFile('image'),
-        'has_images' => $request->hasFile('images'),
-    ]);
+    {
+        \Log::info('Product store request', [
+            'all_data' => $request->all(),
+            'files' => $request->allFiles(),
+            'has_image' => $request->hasFile('image'),
+            'has_images' => $request->hasFile('images'),
+        ]);
 
-    $validated = $request->validate([
-        'product_name_en' => 'required|string|max:255',
-        'product_name_bn' => 'nullable|string|max:255',
-        'category_id' => 'nullable|exists:categories,id',
-        'price' => 'required|numeric|min:0',
-        'discount_price' => 'nullable|numeric|min:0',
-        'quantity' => 'nullable|integer|min:0',
-        'is_in_stock' => 'nullable',
-        'status' => 'nullable',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        'video' => 'nullable|mimes:mp4,mov,avi,wmv|max:10240',
-        'description_en' => 'nullable|string',
-        'description_bn' => 'nullable|string',
-        'short_description_en' => 'nullable|string',
-        'short_description_bn' => 'nullable|string',
-        'calculation' => 'nullable|string',
-        'seller_details' => 'nullable|string',
-        'mobile_no' => 'nullable|string|max:20',
-    ]);
+        $validated = $request->validate([
+            'product_name_en' => 'required|string|max:255',
+            'product_name_bn' => 'nullable|string|max:255',
+            'category_id' => 'nullable|exists:categories,id',
+            'price' => 'required|numeric|min:0',
+            'discount_price' => 'nullable|numeric|min:0',
+            'quantity' => 'nullable|integer|min:0',
+            'is_in_stock' => 'nullable',
+            'status' => 'nullable',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'video' => 'nullable|mimes:mp4,mov,avi,wmv|max:10240',
+            'description_en' => 'nullable|string',
+            'description_bn' => 'nullable|string',
+            'short_description_en' => 'nullable|string',
+            'short_description_bn' => 'nullable|string',
+            'calculation' => 'nullable|string',
+            'seller_details' => 'nullable|string',
+            'mobile_no' => 'nullable|string|max:20',
+        ]);
 
-    try {
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        $validated['created_by'] = auth()->id();
-        $validated['is_in_stock'] = $request->input('is_in_stock', 0) ? 1 : 0;
-        $validated['status'] = $request->input('status', 1) ? 1 : 0;
+            $validated['created_by'] = auth()->id();
+            $validated['is_in_stock'] = $request->input('is_in_stock', 0) ? 1 : 0;
+            $validated['status'] = $request->input('status', 1) ? 1 : 0;
 
-        // Store main image - Just store the path (not full URL)
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products/images', 'public');
-            $validated['image'] = $imagePath; // Just the path like 'products/images/filename.jpg'
-            \Log::info('Main image stored', ['path' => $imagePath]);
-        }
-
-        // Store additional images
-        if ($request->hasFile('images')) {
-            $images = [];
-            foreach ($request->file('images') as $image) {
-                $imagePath = $image->store('products/images', 'public');
-                $images[] = $imagePath; // Just the path
-                \Log::info('Additional image stored', ['path' => $imagePath]);
+            // Store main image - Just store the path (not full URL)
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('products/images', 'public');
+                $validated['image'] = $imagePath; // Just the path like 'products/images/filename.jpg'
+                \Log::info('Main image stored', ['path' => $imagePath]);
             }
-            $validated['images'] = json_encode($images);
-        }
 
-        // Store video
-        if ($request->hasFile('video')) {
-            $videoPath = $request->file('video')->store('products/videos', 'public');
-            $validated['video'] = $videoPath; // Just the path like 'products/videos/filename.mp4'
-            \Log::info('Video stored', ['path' => $videoPath]);
-        }
+            // Store additional images
+            if ($request->hasFile('images')) {
+                $images = [];
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->store('products/images', 'public');
+                    $images[] = $imagePath; // Just the path
+                    \Log::info('Additional image stored', ['path' => $imagePath]);
+                }
+                $validated['images'] = json_encode($images);
+            }
 
-        $product = Product::create($validated);
-        
-        $product->update([
-            'auto_id' => date('dmy') . str_pad($product->id, 9, '0', STR_PAD_LEFT)
-        ]);
+            // Store video
+            if ($request->hasFile('video')) {
+                $videoPath = $request->file('video')->store('products/videos', 'public');
+                $validated['video'] = $videoPath; // Just the path like 'products/videos/filename.mp4'
+                \Log::info('Video stored', ['path' => $videoPath]);
+            }
 
-        DB::commit();
-
-        \Log::info('Product created successfully', [
-            'product_id' => $product->id,
-            'image_path' => $product->image ?? null,
-            'images' => $product->images ?? null
-        ]);
-
-        return redirect()->route('products.index')
-            ->with('success', 'Product created successfully');
+            $product = Product::create($validated);
             
-    } catch (\Exception $e) {
-        DB::rollBack();
-        
-        \Log::error('Product creation failed', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-        
-        return back()
-            ->withInput()
-            ->withErrors(['error' => 'Failed to create product: ' . $e->getMessage()]);
+            $product->update([
+                'auto_id' => date('dmy') . str_pad($product->id, 9, '0', STR_PAD_LEFT)
+            ]);
+
+            DB::commit();
+
+            \Log::info('Product created successfully', [
+                'product_id' => $product->id,
+                'image_path' => $product->image ?? null,
+                'images' => $product->images ?? null
+            ]);
+
+            return redirect()->route('products.index')
+                ->with('success', 'Product created successfully');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Product creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to create product: ' . $e->getMessage()]);
+        }
     }
-}
     /**
      * Store a single file with unique filename
      */

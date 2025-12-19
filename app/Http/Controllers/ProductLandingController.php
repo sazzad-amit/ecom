@@ -11,7 +11,6 @@ class ProductLandingController extends Controller
     {
         $query = Product::query()->with('category');
 
-        // Search functionality
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
@@ -61,7 +60,6 @@ class ProductLandingController extends Controller
                 break;
         }
 
-        // Paginate
         $perPage = $request->input('per_page', 12);
         $products = $query->paginate($perPage);
 
@@ -78,9 +76,6 @@ class ProductLandingController extends Controller
         ]);
     }
     
-    /**
-     * Get single product with all details
-     */
     public function show($id)
     {
         $product = Product::with('category')
