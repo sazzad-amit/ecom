@@ -68,7 +68,7 @@ class ProductLandingController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'data' => $products->items(),
+                'products' => $products->items(),
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),
                 'per_page' => $products->perPage(),

@@ -1,206 +1,238 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
 
-    <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-40">
-      <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg">
-            S
-          </div>
-          <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            ShopEasy
-          </span>
-        </div>
+    <!-- ================= Header ================= -->
+    <header class="bg-white shadow sticky top-0 z-40">
+      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-blue-600">ShopEasy</h1>
 
         <button
-          @click="mobileFilterOpen = !mobileFilterOpen"
-          class="lg:hidden px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          @click="cartOpen = true"
+          class="relative bg-blue-600 text-white px-4 py-2 rounded-lg"
         >
-          Filters
+          🛒 Cart
+          <span
+            v-if="cart.length"
+            class="absolute -top-2 -right-2 bg-red-600 text-xs w-5 h-5 flex items-center justify-center rounded-full"
+          >
+            {{ cart.length }}
+          </span>
         </button>
       </div>
     </header>
 
-    <!-- Body -->
-    <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-6">
+    <!-- ================= Body ================= -->
+    <div class="container mx-auto px-4 py-8 flex gap-6">
 
       <!-- Sidebar -->
-      <aside :class="['lg:w-64 flex-shrink-0', mobileFilterOpen ? 'block' : 'hidden lg:block']">
-        <div class="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
+      <aside class="w-64 hidden lg:block">
+        <div class="bg-white rounded-xl shadow p-4 space-y-4 sticky top-24">
+          <input
+            v-model="searchQuery"
+            placeholder="Search product..."
+            class="w-full px-4 py-2 rounded-lg bg-gray-100"
+          />
 
-          <!-- Search -->
-          <div class="mb-6">
-            <label class="text-sm font-semibold text-gray-700 mb-2 block">Search Products</label>
-            <div class="relative">
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search..."
-                class="w-full pl-10 pr-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-blue-500"
-              />
-              <span class="absolute left-3 top-3.5 text-gray-400">🔍</span>
-            </div>
+          <div class="space-y-2">
+            <button
+              v-for="cat in categories"
+              :key="cat"
+              @click="selectedCategory = cat"
+              class="w-full px-3 py-2 rounded-lg text-left"
+              :class="selectedCategory === cat
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100'"
+            >
+              {{ cat }}
+            </button>
           </div>
-
-          <!-- Categories -->
-          <div>
-            <h3 class="text-sm font-semibold text-gray-700 mb-3">Categories</h3>
-            <div class="space-y-2">
-              <button
-                v-for="cat in categories"
-                :key="cat.name"
-                @click="selectCategory(cat.name)"
-                :class="[
-                  'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all text-left',
-                  selectedCategory === cat.name
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md transform scale-105'
-                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                ]"
-              >
-                <span class="text-2xl">{{ cat.icon }}</span>
-                <span class="font-medium">{{ cat.name }}</span>
-              </button>
-            </div>
-          </div>
-
         </div>
       </aside>
 
-      <!-- Main Content -->
+      <!-- ================= Products ================= -->
       <main class="flex-1">
-        <div class="mb-6">
-          <h1 class="text-3xl font-bold text-gray-800">{{ selectedCategory }}</h1>
-          <p class="text-gray-600 mt-1">{{ filteredProducts.length }} products found</p>
-        </div>
+        <h2 class="text-2xl font-bold mb-2">{{ selectedCategory }}</h2>
+        <p class="text-gray-500 mb-6">{{ products.length }} products found</p>
 
-        <!-- Products Grid -->
-        <div v-if="filteredProducts.length > 0"
-             class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          
+        <div
+          v-if="products.length"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        >
           <div
-            v-for="product in filteredProducts"
+            v-for="product in products"
             :key="product.id"
-            class="group bg-white rounded-2xl shadow-md hover:shadow-2xl overflow-hidden transform hover:-translate-y-2 transition"
+            class="bg-white rounded-xl shadow hover:shadow-xl transition overflow-hidden"
           >
-            <div class="relative h-48 bg-gray-100 overflow-hidden">
+
+            <!-- Image -->
+            <div class="relative h-48 bg-gray-100">
               <img
-                :src="product.image"
-                :alt="product.product_name_en"
-              />
-              <div class="absolute top-3 right-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs shadow-lg">
-                New
-              </div>
+  :src="API_BASE_URL + product.image_url"
+  class="w-full h-full object-cover"
+/>
+              <span
+                class="absolute top-2 left-2 px-2 py-1 text-xs rounded text-white"
+                :class="product.is_in_stock ? 'bg-green-600' : 'bg-red-600'"
+              >
+                {{ product.is_in_stock ? 'In Stock' : 'Out of Stock' }}
+              </span>
             </div>
 
-            <div class="p-4">
-              <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">
-                {{ product.product_name_en }}
-              </h3>
+            <!-- Content -->
+            <div class="p-4 space-y-2">
+              <h3 class="font-semibold">{{ product.product_name_en }}</h3>
+              <p class="text-sm text-gray-500 line-clamp-2">
+                {{ product.short_description_en }}
+              </p>
 
-              <div class="flex items-center justify-between">
-                <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  ${{ product.price }}
+              <div class="flex items-center gap-2">
+                <span class="text-lg font-bold text-blue-600">
+                  ৳ {{ product.discount_price }}
+                </span>
+                <span
+                  v-if="product.discount_price < product.price"
+                  class="text-sm line-through text-gray-400"
+                >
+                  ৳ {{ product.price }}
                 </span>
               </div>
 
               <button
-                class="mt-3 w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 rounded-xl hover:shadow-lg transition font-medium"
+                @click="addToCart(product)"
+                :disabled="!product.is_in_stock"
+                class="w-full py-2 rounded-lg text-white"
+                :class="product.is_in_stock
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gray-400 cursor-not-allowed'"
               >
                 Add to Cart
               </button>
             </div>
-
           </div>
-
         </div>
 
-        <!-- No Products -->
-        <div v-else class="text-center py-20">
-          <div class="text-6xl mb-4">🔍</div>
-          <h3 class="text-2xl font-bold text-gray-700 mb-2">No products found</h3>
-          <p class="text-gray-500">Try adjusting your search or filters</p>
+        <div v-else class="text-center py-20 text-gray-500">
+          No products found
         </div>
-
       </main>
-
     </div>
+
+    <!-- ================= Cart Modal ================= -->
+    <div
+      v-if="cartOpen"
+      class="fixed inset-0 bg-black/40 flex justify-end z-50"
+    >
+      <div class="w-full max-w-md bg-white h-full p-6 flex flex-col">
+
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">Your Cart</h2>
+          <button @click="cartOpen = false">✖</button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto space-y-4">
+          <div
+            v-for="item in cart"
+            :key="item.id"
+            class="flex gap-3 border-b pb-3"
+          >
+            <img
+              :src="`/${item.image}`"
+              class="w-16 h-16 object-cover rounded"
+            />
+            <div class="flex-1">
+              <h4 class="font-semibold">{{ item.product_name_en }}</h4>
+              <p class="text-sm text-gray-500">
+                ৳ {{ item.discount_price }} × {{ item.qty }}
+              </p>
+
+              <div class="flex items-center gap-2 mt-1">
+                <button @click="item.qty--" class="px-2 bg-gray-200">-</button>
+                <span>{{ item.qty }}</span>
+                <button @click="item.qty++" class="px-2 bg-gray-200">+</button>
+                <button
+                  @click="removeFromCart(item.id)"
+                  class="ml-auto text-red-600 text-sm"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t pt-4">
+          <p class="font-bold text-lg">
+            Total: ৳ {{ cartTotal }}
+          </p>
+          <button class="w-full mt-3 py-3 bg-blue-600 text-white rounded-lg">
+            Checkout
+          </button>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import axios from "axios";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-/* ------------------------------
-   Categories
---------------------------------*/
-const categories = [
-  { name: "All Products", icon: "🛍️" },
-  { name: "Electronics", icon: "📱" },
-  { name: "Fashion", icon: "👕" },
-  { name: "Home", icon: "🏠" },
-  { name: "Sports", icon: "⚽" },
-];
-
-/* ------------------------------
-   State
---------------------------------*/
+/* ================= State ================= */
 const products = ref([]);
 const searchQuery = ref("");
 const selectedCategory = ref("All Products");
-const mobileFilterOpen = ref(false);
-const loading = ref(false);
+const cart = ref([]);
+const cartOpen = ref(false);
 
-/* ------------------------------
-   API Call
---------------------------------*/
+const categories = [
+  "All Products",
+  "Electronics",
+  "Fashion",
+  "Home",
+  "Sports",
+];
+
+/* ================= API ================= */
 const fetchProducts = async () => {
-  loading.value = true;
+  const res = await axios.get("/api/products-landing-search", {
+    params: {
+      q: searchQuery.value || null,
+      category:
+        selectedCategory.value === "All Products"
+          ? null
+          : selectedCategory.value,
+    },
+  });
+  products.value = res.data.data.data;
+};
 
-  try {
-    const response = await axios.get("/api/products-landing-search", {
-      params: {
-        q: searchQuery.value || null,
-        category:
-          selectedCategory.value === "All Products"
-            ? null
-            : selectedCategory.value,
-      },
-    });
-
-    products.value = response.data.data.data;
-  } catch (error) {
-    console.error("Product fetch failed", error);
-  } finally {
-    loading.value = false;
+/* ================= Cart ================= */
+const addToCart = (product) => {
+  const existing = cart.value.find(p => p.id === product.id);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.value.push({ ...product, qty: 1 });
   }
 };
 
-/* ------------------------------
-   Computed
---------------------------------*/
-const filteredProducts = computed(() => products.value);
+const removeFromCart = (id) => {
+  cart.value = cart.value.filter(p => p.id !== id);
+};
 
-/* ------------------------------
-   Watch (Live Search + Filter)
---------------------------------*/
-watch([searchQuery, selectedCategory], () => {
-  fetchProducts();
-});
+const cartTotal = computed(() =>
+  cart.value.reduce(
+    (sum, p) => sum + Number(p.discount_price) * p.qty,
+    0
+  )
+);
 
-/* ------------------------------
-   Methods
---------------------------------*/
-function selectCategory(cat) {
-  selectedCategory.value = cat;
-  mobileFilterOpen.value = false;
-}
+/* ================= Watch ================= */
+watch([searchQuery, selectedCategory], fetchProducts);
 
-/* ------------------------------
-   On Load
---------------------------------*/
-onMounted(() => {
-  fetchProducts();
-});
+/* ================= Init ================= */
+onMounted(fetchProducts);
 </script>
