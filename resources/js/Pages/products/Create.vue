@@ -27,13 +27,11 @@
               <input v-model="form.product_name_bn" type="text" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500" />
               <div v-if="form.errors.product_name_bn" class="text-red-500 text-sm mt-1">{{ form.errors.product_name_bn }}</div>
             </div>
-
             <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
               <select v-model="form.category_id" class="border border-gray-300 rounded p-2 w-full focus:ring-blue-500 focus:border-blue-500">
                 <option value="0">Select Category</option>
-                <option value="1"> Category 1</option>
-                <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+                <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.category_name_en }}</option>
               </select>
               <div v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">{{ form.errors.category_id }}</div>
             </div>

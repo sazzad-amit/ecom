@@ -22,6 +22,12 @@ class ProductLandingController extends Controller
             });
         }
 
+        if ($request->category_ids) {
+            $cat = [$request->category_ids];
+            $query->whereIn('category_id', $cat);
+        }
+
+
         // Category filter
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->input('category_id'));
