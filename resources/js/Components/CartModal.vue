@@ -234,9 +234,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useCartStore } from '@/stores/cart';
-import axios from 'axios'; // Added axios import
+import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const emit = defineEmits(['close', 'proceed-to-checkout']);
 
@@ -308,7 +308,7 @@ const getImageUrl = (imagePath) => {
 
 const handleImageError = (event) => {
   event.target.src = '/placeholder-image.jpg';
-  event.target.onerror = null; // Prevent infinite loop
+  event.target.onerror = null;
 };
 
 const formatPrice = (price) => {
@@ -340,7 +340,6 @@ const clearCart = () => {
 const proceedToCheckout = async () => {
   // Validate form first
   if (!validateForm()) {
-    // Scroll to error messages
     setTimeout(() => {
       const errorElement = document.querySelector('.bg-red-50');
       if (errorElement) {
@@ -353,7 +352,7 @@ const proceedToCheckout = async () => {
   processing.value = true;
   
   try {
-    // Prepare order items in the format your API expects
+    // Prepare order items
     const orderItems = cart.value.map(item => ({
       product_id: item.id,
       product_name: item.product_name_en,
@@ -376,7 +375,7 @@ const proceedToCheckout = async () => {
     
     console.log('Sending order data:', orderData);
     
-    // Send to API - Fixed axios call
+    // Send to API - FIXED ROUTE
     const response = await axios.post(`${API_BASE_URL}/api/products-place-order`, orderData);
     
     if (response.data.success) {
@@ -403,16 +402,12 @@ const proceedToCheckout = async () => {
   } catch (error) {
     console.error('Checkout error:', error);
     
-    // Show appropriate error message
     if (error.response) {
-      // Server responded with error status
       const errorMsg = error.response.data?.message || error.response.statusText;
       alert(`Failed to place order: ${errorMsg}`);
     } else if (error.request) {
-      // Request made but no response
       alert('Network error. Please check your connection and try again.');
     } else {
-      // Something else happened
       alert('Failed to place order. Please try again.');
     }
   } finally {
@@ -423,7 +418,6 @@ const proceedToCheckout = async () => {
 /* ================= Watch ================= */
 watch(cart, (newCart) => {
   if (newCart.length === 0) {
-    // Reset form when cart becomes empty
     customerInfo.value = {
       name: '',
       mobile: '',
@@ -435,7 +429,7 @@ watch(cart, (newCart) => {
   }
 }, { immediate: true });
 
-// Auto-validate when form changes (debounced)
+// Auto-validate when form changes
 let validationTimeout;
 watch(customerInfo.value, () => {
   if (Object.keys(errors.value).length > 0) {

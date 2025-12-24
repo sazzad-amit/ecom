@@ -7,7 +7,7 @@
 
         <button
           @click="openCart"
-          class="relative bg-blue-600 text-white px-4 py-2 rounded-lg"
+          class="relative bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
           🛒 Cart
           <span
@@ -28,7 +28,7 @@
           <input
             v-model="searchQuery"
             placeholder="Search product..."
-            class="w-full px-4 py-2 rounded-lg bg-gray-100 border"
+            class="w-full px-4 py-2 rounded-lg bg-gray-100 border focus:outline-none focus:ring-2 focus:ring-blue-500"
             @input="handleSearch"
           />
 
@@ -67,7 +67,8 @@
           <div
             v-for="product in filteredProducts"
             :key="product.id"
-            class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition-shadow"
+            class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition-shadow cursor-pointer"
+            @click="openProductDetails(product)"
           >
             <img
               :src="getImageUrl(product.image_url)"
@@ -85,14 +86,27 @@
 
             <div class="mt-2 font-bold text-blue-600">
               ৳ {{ formatPrice(product.discount_price) }}
+              <span v-if="product.original_price" class="text-sm text-gray-400 line-through ml-2">
+                ৳ {{ formatPrice(product.original_price) }}
+              </span>
             </div>
 
-            <button
-              @click="addToCart(product)"
-              class="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
-            >
-              Add to Cart
-            </button>
+            <div class="mt-3 flex gap-2">
+              <button
+                @click.stop="addToCart(product)"
+                class="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
+              >
+                Add to Cart
+              </button>
+
+              <button
+                @click.stop="openProductDetails(product)"
+                class="flex-1 bg-gray-600 text-white py-2 rounded hover:bg-gray-700 transition-colors"
+              >
+                Details
+              </button>
+            </div>
+
           </div>
         </div>
 
@@ -101,6 +115,19 @@
         </div>
       </main>
     </div>
+
+    <!-- ================= Modals ================= -->
+    <CartModal
+      v-if="showCartModal"
+      @close="showCartModal = false"
+    />
+
+    <ProductDetailsModal
+      v-if="showProductModal && selectedProduct"
+      :product="selectedProduct"
+      @close="showProductModal = false"
+      @add-to-cart="addToCartFromModal"
+    />
   </div>
 </template>
 
@@ -108,7 +135,9 @@
 import { ref, computed, onMounted } from "vue"
 import axios from "axios"
 import { useCartStore } from "@/stores/cart"
-import TreeNode from "@/components/TreeNode.vue" // Move TreeNode to separate file
+import TreeNode from "@/components/TreeNode.vue"
+import CartModal from "@/components/CartModal.vue"
+import ProductDetailsModal from "@/components/ProductDetailsModal.vue"
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"
@@ -120,6 +149,9 @@ const searchQuery = ref("")
 const selectedLeafIds = ref([])
 const selectedTitle = ref("All Products")
 const loading = ref(false)
+const showCartModal = ref(false)
+const showProductModal = ref(false)
+const selectedProduct = ref(null)
 
 const cartStore = useCartStore()
 
@@ -228,6 +260,23 @@ const fetchCategories = async () => {
   }
 }
 
+/* ================= Modal Functions ================= */
+
+const openCart = () => {
+  showCartModal.value = true
+}
+
+const openProductDetails = (product) => {
+  selectedProduct.value = product
+  showProductModal.value = true
+}
+
+const addToCartFromModal = (product) => {
+  addToCart(product)
+  // Optional: Close modal after adding to cart
+  // showProductModal.value = false
+}
+
 /* ================= Utils ================= */
 
 const getImageUrl = (path) => {
@@ -241,11 +290,9 @@ const formatPrice = (price) =>
 
 const addToCart = (product) => {
   cartStore.addToCart(product)
-}
-
-const openCart = () => {
-  // You can implement cart drawer/modal here
-  alert(`Cart has ${cartStore.cart.length} items`)
+  
+  // Optional: Show notification or feedback
+  // alert(`${product.product_name_en} added to cart!`)
 }
 
 const handleSearch = () => {
@@ -277,5 +324,10 @@ onMounted(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Modal background blur effect */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
 }
 </style>

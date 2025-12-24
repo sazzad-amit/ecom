@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductLandingController;
@@ -46,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
 });
     Route::get('api/products-landing-search', [ProductLandingController::class, 'search'])->name('api.products.search');
     Route::get('api/products-categories-search', [ProductLandingController::class, 'categories'])->name('api.products.categories');
+    Route::post('api/products-place-order', [ProductOrderController::class, 'placeOrder'])->name('api.products.place-order');
 
 
 require __DIR__.'/auth.php';
