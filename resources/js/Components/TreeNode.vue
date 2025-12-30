@@ -110,39 +110,14 @@ const toggle = () => {
   isExpanded.value = !isExpanded.value
 }
 
-/**
- * Recursively get all leaf category IDs - ALWAYS returns array
- */
-const getLeafIds = (node) => {
-  if (!node.children || node.children.length === 0) return [parseInt(node.id)]
-  return node.children.flatMap(child => getLeafIds(child))
-}
-
 const selectNode = () => {
-  const leafIds = getLeafIds(props.node)
-  console.log('Selecting node - category_ids:', leafIds, 'Type:', typeof leafIds, 'Is Array:', Array.isArray(leafIds))
-  
   emit('select', {
     ...props.node,
-    category_ids: leafIds
+    category_id: parseInt(props.node.id)  // Simple category_id only
   })
 }
 
 const handleChildSelect = (childNode) => {
-  // DOUBLE CHECK - ensure it's always an array
-  let leafIds = []
-  
-  if (childNode.category_ids && Array.isArray(childNode.category_ids)) {
-    leafIds = childNode.category_ids.map(id => parseInt(id))
-  } else if (childNode.id) {
-    leafIds = [parseInt(childNode.id)]
-  }
-  
-  console.log('Child select - category_ids:', leafIds)
-  
-  emit('select', {
-    ...childNode,
-    category_ids: leafIds
-  })
+  emit('select', childNode)  // Just pass through the child node
 }
 </script>

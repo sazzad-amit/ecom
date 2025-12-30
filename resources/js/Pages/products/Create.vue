@@ -175,6 +175,7 @@ const productId = ref(null);
 const isEditMode = computed(() => productId.value !== null);
 
 const form = useForm({
+  id: null, 
   product_name_en: '',
   product_name_bn: '',
   category_id: 0,
@@ -252,16 +253,19 @@ const handleVideoUpload = e => {
 };
 
 const submit = () => {
-  const method = isEditMode.value ? 'put' : 'post';
-  const routeName = isEditMode.value ? route('products.update', productId.value) : route('products.store');
+  const id = route().params.id; // ✅ URL থেকে id ধরা
 
-  form.submit(method, routeName, {
+  if (id) {
+    form.id = id; // 🔴 update এর জন্য id পাঠানো
+  }
+
+  form.post(route('products.store'), {
     forceFormData: true,
     preserveScroll: true,
     onSuccess: () => router.visit(route('products.index')),
-    onError: e => console.log('Errors', e),
   });
 };
+
 
 const cancel = () => router.visit(route('products.index'));
 </script>

@@ -146,7 +146,7 @@ const API_BASE_URL =
 const products = ref([])
 const categories = ref([])
 const searchQuery = ref("")
-const selectedLeafIds = ref([])
+const selectedCategoryId = ref(null) // Changed from selectedLeafIds
 const selectedTitle = ref("All Products")
 const loading = ref(false)
 const showCartModal = ref(false)
@@ -156,17 +156,6 @@ const selectedProduct = ref(null)
 const cartStore = useCartStore()
 
 /* ================= Category Helpers ================= */
-
-// id => category
-const categoryMap = computed(() => {
-  const map = {}
-  categories.value.forEach(c => {
-    if (c && c.id) {
-      map[c.id] = c
-    }
-  })
-  return map
-})
 
 // parent => children
 const childrenMap = computed(() => {
@@ -195,28 +184,12 @@ const treeStructure = computed(() => {
   return roots.map(root => buildTree(root))
 })
 
-// get all leaf ids under any node
-const getLeafByParent = (parentId) => {
-  const result = []
-
-  const walk = (id) => {
-    if (!childrenMap.value[id] || childrenMap.value[id].length === 0) {
-      result.push(id)
-      return
-    }
-    childrenMap.value[id].forEach(c => walk(c.id))
-  }
-
-  walk(parentId)
-  return result
-}
-
 /* ================= Actions ================= */
 
 const selectCategory = (cat) => {
   if (!cat || !cat.id) return
   
-  selectedLeafIds.value = getLeafByParent(cat.id)
+  selectedCategoryId.value = cat.id // Store single category_id
   selectedTitle.value = cat.category_name_en
   fetchProducts()
 }
@@ -230,8 +203,9 @@ const fetchProducts = async () => {
       params.q = searchQuery.value.trim()
     }
     
-    if (selectedLeafIds.value.length > 0) {
-      params.category_ids = selectedLeafIds.value.join(',')
+    // Send only category_id instead of leaf IDs
+    if (selectedCategoryId.value) {
+      params.category_id = selectedCategoryId.value
     }
     
     const res = await axios.get(
