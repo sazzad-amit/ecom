@@ -15,6 +15,7 @@
 
       <form @submit.prevent="submitForm" class="bg-white shadow-sm rounded-lg p-6 border border-gray-200">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
           <!-- English Name -->
           <div>
             <label for="source_name_en" class="block text-sm font-medium text-gray-700 mb-1">
@@ -71,30 +72,20 @@
             />
           </div>
 
-          <!-- English Details -->
+          <!-- English Details CKEditor -->
           <div class="md:col-span-2">
-            <label for="details_en" class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
               Details (English)
             </label>
-            <textarea
-              v-model="form.details_en"
-              id="details_en"
-              rows="3"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-colors"
-            ></textarea>
+            <ckeditor :editor="editor" v-model="form.details_en" :config="editorConfig" />
           </div>
 
-          <!-- Bangla Details -->
+          <!-- Bangla Details CKEditor -->
           <div class="md:col-span-2">
-            <label for="details_bn" class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
               Details (Bangla)
             </label>
-            <textarea
-              v-model="form.details_bn"
-              id="details_bn"
-              rows="3"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-colors"
-            ></textarea>
+            <ckeditor :editor="editor" v-model="form.details_bn" :config="editorConfig" />
           </div>
 
           <!-- Status -->
@@ -126,16 +117,39 @@
 </template>
 
 <script>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLayout from '@/Layouts/AppLayout.vue'
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import { Ckeditor } from '@ckeditor/ckeditor5-vue'
 
 export default {
-  components: { AppLayout },
-  props: {
-    source: Object,
-    errors: Object,
+  components: { 
+    AppLayout,
+    ckeditor: Ckeditor  // Register with lowercase name
   },
+
+  props: {
+    source: {
+      type: Object,
+      default: null
+    },
+    errors: {
+      type: Object,
+      default: () => ({})
+    }
+  },
+
   data() {
     return {
+      editor: ClassicEditor,
+      editorConfig: {
+        toolbar: [
+          'heading', '|',
+          'bold', 'italic', '|',
+          'link', 'bulletedList', 'numberedList', '|',
+          'blockQuote', 'insertTable', '|',
+          'undo', 'redo'
+        ],
+      },
       form: {
         source_name_en: '',
         source_name_bn: '',
@@ -148,41 +162,37 @@ export default {
       processing: false,
     }
   },
+
   mounted() {
     if (this.source) {
       this.form = {
-        ...this.source,
+        id: this.source.id,
+        source_name_en: this.source.source_name_en || '',
+        source_name_bn: this.source.source_name_bn || '',
+        source_auto_id: this.source.source_auto_id || '',
+        mobile_no: this.source.mobile_no || '',
+        details_en: this.source.details_en || '',
+        details_bn: this.source.details_bn || '',
         status: Boolean(this.source.status),
-      };
+      }
     }
   },
+
   methods: {
     submitForm() {
-      this.processing = true;
+      this.processing = true
+      const request = this.form.id
+        ? this.$inertia.put(`/sources/${this.form.id}`, this.form)
+        : this.$inertia.post('/sources', this.form)
       
-      if (this.form.id) {
-        this.$inertia.put(`/sources/${this.form.id}`, this.form, {
-          onSuccess: () => {
-            this.processing = false;
-          },
-          onError: () => {
-            this.processing = false;
-          }
-        });
-      } else {
-        this.$inertia.post('/sources', this.form, {
-          onSuccess: () => {
-            this.processing = false;
-          },
-          onError: () => {
-            this.processing = false;
-          }
-        });
-      }
+      request.finally(() => {
+        this.processing = false
+      })
     },
+
     goBack() {
-      this.$inertia.get('/sources');
-    }
-  }
+      this.$inertia.get('/sources')
+    },
+  },
 }
 </script>
